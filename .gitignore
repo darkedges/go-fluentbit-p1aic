@@ -1,0 +1,4 @@
+*.h
+*.so
+.idea/
+fluent-bit.conf
