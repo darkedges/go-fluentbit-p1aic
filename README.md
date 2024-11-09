@@ -13,8 +13,10 @@ This is a FluentBit input module for the ingestion of PingOne Advanced Identity 
 | `log_filter`             | Filter to be applied. Example `/payload co "WARNING"`. See <https://backstage.forgerock.com/docs/idcloud/latest/tenants/audit-debug-logs.html#filter-log-results>                                                                                                                                                                                                                                                                                                                       |
 | `db`                     | location od state file. example `/fluentbit/state.json`                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-## Playground                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+## Playground                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 
+
+Edit <fluent-bit.conf.example> and rename to `fluent-bit.conf`
 
 Edit <fluent-bit.conf.example> and rename to `fluent-bit.conf`
 
