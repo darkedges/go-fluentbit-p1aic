@@ -5,14 +5,18 @@ This is a FluentBit input module for the ingestion of PingOne Advanced Identity 
 ## Configuration
 
 | key                      | value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `p1aic_id_cloud_tenant ` | Enter the Identity Cloud tenant URL, for example, `https://<tenant-env-fqdn>`, where `<tenant-env-fqdn>` is your Identity Cloud tenant.                                                                                                                                                                                                                                                                                                                                                 |
 | `api_key_id`             | Enter the API Key ID that you'll use to authenticate to the Identity Cloud REST API endpoints.   See <https://backstage.forgerock.com/docs/idcloud/latest/developer-docs/authenticate-to-rest-api-with-api-key-and-secret.html#get_an_api_key_and_secret>                                                                                                                                                                                                                               |
 | `api_key_secret`         | Enter the API Key Secret that you'll use to authenticate to the Identity Cloud REST API endpoints.                                                                                                                                                                                                                                                                                                                                                                                      |
 | `log_sources`            | Provides a comma-separated list of Identity Cloud log sources to capture. By default, the app `captures am-authentication`, `am-access`, `am-config` and `idm-activity`. You can add more log sources if needed, but be aware that the data returned by some logs may not be searchable. See Source descriptions for further information on Identity Cloud logging sources. See <https://backstage.forgerock.com/docs/idcloud/latest/tenants/audit-debug-logs.html#source-descriptions> |
 | `log_filter`             | Filter to be applied. Example `/payload co "WARNING"`. See <https://backstage.forgerock.com/docs/idcloud/latest/tenants/audit-debug-logs.html#filter-log-results>                                                                                                                                                                                                                                                                                                                       |
+| `db`                     | location od state file. example `/fluentbit/state.json`                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-## Playground
+## Playground                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+
+
+Edit <fluent-bit.conf.example> and rename to `fluent-bit.conf`
 
 Edit <fluent-bit.conf.example> and rename to `fluent-bit.conf`
 
@@ -20,7 +24,7 @@ Build the docker image locally to see how it works.
 
 ```bash
 docker build . -t fluent-bit-p1aic
-docker run -it --rm fluent-bit-p1aic
+ocker run -it --rm -v ${PWD}/state:/fluentbit fluent-bit-p1aic 
 ```
 
 The output produced should resemble the following:

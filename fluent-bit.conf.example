@@ -16,7 +16,7 @@
     api_key_secret          // API Key Secret of Log Account
     log_sources             // What logs are to be collected
     log_filter              // What filter is to be applied
-
+    db                      // location of state file
 
 [OUTPUT]
     Name  stdout

@@ -2,3 +2,4 @@
 *.so
 .idea/
 fluent-bit.conf
+state/
