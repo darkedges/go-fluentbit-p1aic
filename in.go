@@ -6,8 +6,10 @@ package main
 import "C"
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 	"unsafe"
@@ -26,8 +28,13 @@ var apiKeySecret string
 var logSources string
 var logFilter string
 var client *req.Client
+var dbfile string
 
 const MonitoringLogsTemplate = "%s/monitoring/logs"
+
+type FluentBitState struct {
+	PreviousBeginTime string `json:"previousBeginTime"`
+}
 
 // This holds the result from the log request
 type MonitoringLogsResponse struct {
@@ -63,10 +70,19 @@ func FLBPluginInit(plugin unsafe.Pointer) int {
 	apiKeySecret = input.FLBPluginConfigKey(plugin, "api_key_secret")
 	logSources = input.FLBPluginConfigKey(plugin, "log_sources")
 	logFilter = input.FLBPluginConfigKey(plugin, "log_filter")
+	dbfile = input.FLBPluginConfigKey(plugin, "db")
+
 	if logSources == "" {
 		logSources = "am-authentication,am-access,am-config,idm-activity"
 	}
-
+	if dbfile != "" {
+		var err error
+		previousBeginTime, err = readCheckPoint(dbfile)
+		if err != nil {
+			fmt.Printf("error: %s\n", err)
+			return input.FLB_ERROR
+		}
+	}
 	// Attempt to parse previousBeginTime
 	parsedTime, err := time.Parse("2006-01-02T15:04:05Z", previousBeginTime)
 	previousBeginTime = parsedTime.String()
@@ -92,7 +108,13 @@ func FLBPluginInputCallback(data *unsafe.Pointer, size *C.size_t) int {
 	// Calculate the end time
 	endTime := time.Now().UTC().Add(-60 * time.Second).Format("2006-01-02T15:04:05Z")
 	//Store it for future lookup
-	saveCheckPoint("beginTime", endTime)
+	if dbfile != "" {
+		err := saveCheckPoint(dbfile, endTime)
+		if err != nil {
+			fmt.Printf("Error saving checkpoint: %s\n", err)
+			return input.FLB_ERROR
+		}
+	}
 
 	buf := bytes.NewBuffer([]byte{})
 	pagedResultsCookie := ""
@@ -174,8 +196,50 @@ func FLBPluginExit() int {
 	return input.FLB_OK
 }
 
-func saveCheckPoint(key string, value string) {
-	// todo
+func saveCheckPoint(dbfile string, previousBeginTime string) error {
+	if _, err := os.Stat(dbfile); os.IsNotExist(err) {
+		dirName := filepath.Dir(dbfile)
+		err := os.MkdirAll(dirName, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	file, _ := os.OpenFile(dbfile, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("error: %s\n", err)
+		}
+	}(file)
+	err := json.NewEncoder(file).Encode(
+		FluentBitState{
+			PreviousBeginTime: previousBeginTime,
+		})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func readCheckPoint(dbfile string) (string, error) {
+	_, err := os.Stat(dbfile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+	} else {
+		b, err := os.ReadFile(dbfile)
+		if err != nil {
+			return "", err
+		}
+		var u FluentBitState
+		err = json.NewDecoder(bytes.NewBuffer(b)).Decode(&u)
+		if err != nil {
+			return "", err
+		}
+		return u.PreviousBeginTime, nil
+	}
+	return "", nil
 }
 
 func main() {

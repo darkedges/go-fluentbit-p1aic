@@ -11,12 +11,12 @@
 [INPUT]
     Name p1aic
     Tag  p1aic
-    p1aic_id_cloud_tenant  "" // url of PingOne Advance Identity Cloud tenant
-    api_key_id             "" // API Key Id of Log Account
-    api_key_secret         "" // API Key Secret of Log Account
-    log_sources            "" // What logs are to be collected
-    log_filter             "" // What filter is to be applied
-
+    p1aic_id_cloud_tenant   // url of PingOne Advance Identity Cloud tenant
+    api_key_id              // API Key Id of Log Account
+    api_key_secret          // API Key Secret of Log Account
+    log_sources             // What logs are to be collected
+    log_filter              // What filter is to be applied
+    db                      // location of state file
 
 [OUTPUT]
     Name  stdout

@@ -17,5 +17,6 @@ COPY --from=gobuilder /root/fluent-bit.conf /fluent-bit/etc/
 COPY --from=gobuilder /root/plugins.conf /fluent-bit/etc/
 
 EXPOSE 2020
+VOLUME /fluentbit
 
 CMD ["/fluent-bit/bin/fluent-bit", "--config", "/fluent-bit/etc/fluent-bit.conf"]

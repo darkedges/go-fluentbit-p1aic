@@ -3,6 +3,7 @@ module github.com/darkedges/go-fluentbit-p1aic
 go 1.23.2
 
 require (
+	crawshaw.dev/jsonfile v0.0.0-20240206193014-699d1dad804e // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/cloudflare/circl v1.4.0 // indirect
 	github.com/fluent/fluent-bit-go v0.0.0-20230731091245-a7a013e2473c // indirect
