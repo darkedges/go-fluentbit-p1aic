@@ -83,9 +83,7 @@ func FLBPluginInit(plugin unsafe.Pointer) int {
 			return input.FLB_ERROR
 		}
 	}
-	// Attempt to parse previousBeginTime
 	parsedTime, err := time.Parse("2006-01-02T15:04:05Z", previousBeginTime)
-	previousBeginTime = parsedTime.String()
 	if err != nil {
 		previousBeginTime = ""
 	}
@@ -123,7 +121,7 @@ func FLBPluginInputCallback(data *unsafe.Pointer, size *C.size_t) int {
 	for {
 		// Configure the Client Request
 		queryParams := map[string]string{
-			"_pageSize": "10",
+			"_pageSize": "500",
 			"source":    logSources,
 			"beginTime": beginTime,
 			"endTime":   endTime,
@@ -135,7 +133,6 @@ func FLBPluginInputCallback(data *unsafe.Pointer, size *C.size_t) int {
 			queryParams["_queryFilter"] = logFilter
 		}
 		var monitoringLogsResponse MonitoringLogsResponse
-
 		// Get the log results
 		resp, err := client.R().
 			SetQueryParams(queryParams).
@@ -148,9 +145,12 @@ func FLBPluginInputCallback(data *unsafe.Pointer, size *C.size_t) int {
 		if err != nil { // Error handling.
 			return input.FLB_ERROR
 		}
+		if resp.IsErrorState() {
+			fmt.Printf("error: %+v\n", resp)
+			return input.FLB_ERROR
+		}
 		if resp.IsSuccessState() { // Status code is between 200 and 299.
 			pagedResultsCookie = monitoringLogsResponse.PagedResultsCookie
-
 			for _, element := range monitoringLogsResponse.Result {
 				flb_time := input.FLBTime{element.Timestamp}
 				entry := []interface{}{flb_time, element.Payload}
